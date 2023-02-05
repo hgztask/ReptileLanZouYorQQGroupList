@@ -58,6 +58,12 @@ public abstract class ParentPanel {
 
 
     /**
+     * 获取代理浏览器监听的网络请求信息
+     */
+    private JButton demoJButton = new JButton("获取代理浏览器网络信息");
+
+
+    /**
      * 打印网页中所有列表信息
      */
     private JButton printListJButton = new JButton("打印网页中所有列表信息");

@@ -252,24 +252,6 @@ public  class ParentPanelEss implements InitializationFace {
         options.setExperimentalOption("useAutomationExtension", false);
         dataParent.setEdgeDriver(new EdgeDriver(options));
         dataParent.getEdgeDriver().manage().window().setSize(dataParent.getDimension());
-        //监听网络请求
-        browserMobProxy.addRequestFilter((httpRequest, httpMessageContents, httpMessageInfo) -> {
-            String httpRequestUri = httpRequest.getUri();
-//            if (!(httpRequestUri.contains("/ajaxm.php"))) {
-//                return null;
-//            }
-            //获取返回请求的内容
-            List<HarEntry> entries = browserMobProxy.getHar().getLog().getEntries();
-            for (HarEntry harEntry : entries) {
-                String url = harEntry.getRequest().getUrl();
-//                if (!(url.contains("https://www.lanzoui.com/fn?"))) {
-//                    continue;
-//                }
-                System.out.println(url);
-                //edgeDriver.get(url);
-            }
-            return null;
-        });
         return browserMobProxy;
     }
 

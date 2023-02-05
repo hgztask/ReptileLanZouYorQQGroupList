@@ -15,9 +15,16 @@ import com.MultithreadCrawling.picturesAndText.impi.InitializationFace;
 import com.MultithreadCrawling.picturesAndText.view.JFileChooserDialog;
 import com.MultithreadCrawling.picturesAndText.view.panel.LanZouYJPanel;
 import com.MultithreadCrawling.picturesAndText.view.panel.ParentPanel;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpResponse;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.Setter;
+import net.lightbody.bmp.BrowserMobProxy;
+import net.lightbody.bmp.core.har.HarEntry;
+import net.lightbody.bmp.filters.RequestFilter;
+import net.lightbody.bmp.util.HttpMessageContents;
+import net.lightbody.bmp.util.HttpMessageInfo;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -28,12 +35,15 @@ import org.openqa.selenium.edge.EdgeDriver;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +55,7 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  * @date 2023/2/4 15:46
  */
-public class LanZouYJPanelEss  extends ParentPanelEss implements CrawlingRuleFace<ArrayList<LanZouYInfo>>,InitializationFace {
+public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace<ArrayList<LanZouYInfo>>, InitializationFace {
 
     /**
      * 蓝奏云面板view
@@ -61,9 +71,10 @@ public class LanZouYJPanelEss  extends ParentPanelEss implements CrawlingRuleFac
 
     /**
      * 构造器
-     * @param dataParent 面板父级的属性成员
+     *
+     * @param dataParent   面板父级的属性成员
      * @param lanZouYPanel 蓝奏云面板 核心是输入蓝奏云特需要的组件控件
-     * @param dataLanZouY 蓝奏云属性层
+     * @param dataLanZouY  蓝奏云属性层
      */
     public LanZouYJPanelEss(DataParent dataParent, LanZouYJPanel lanZouYPanel, DataLanZouY dataLanZouY) {
         super(lanZouYPanel, dataParent);
@@ -93,7 +104,7 @@ public class LanZouYJPanelEss  extends ParentPanelEss implements CrawlingRuleFac
         JPanel topJPanel = lanZouYPanel.getTopJPanel();
         topJPanel.setLayout(new GridLayout(6, 1));
         JPanel bottJPanel = lanZouYPanel.getBottJPanel();
-        bottJPanel.setLayout(new GridLayout(4, 3));
+        bottJPanel.setLayout(new GridLayout(5, 3));
 
 
         //每一个对象一个面板
@@ -131,6 +142,7 @@ public class LanZouYJPanelEss  extends ParentPanelEss implements CrawlingRuleFac
         bottJPanel.add(lanZouYPanel.getOpenWebJbutton());
         bottJPanel.add(lanZouYPanel.getLoadUrlJbutton());
         bottJPanel.add(lanZouYPanel.getPrintWebJButton());
+        bottJPanel.add(lanZouYPanel.getDemoJButton());
         bottJPanel.add(lanZouYPanel.getPrintListJButton());
         bottJPanel.add(lanZouYPanel.getWriteListJbutton());
 
@@ -145,9 +157,6 @@ public class LanZouYJPanelEss  extends ParentPanelEss implements CrawlingRuleFac
 
         //添加进右击菜单
         lanZouYPanel.getStartPagejPopupMenu().add(whileCHicjMenuItem);
-
-
-
 
 
         JMenuItem editUrlItem = lanZouYPanel.getEditUrlItem();
@@ -517,6 +526,27 @@ public class LanZouYJPanelEss  extends ParentPanelEss implements CrawlingRuleFac
             JOptionPane.showMessageDialog(bottJPanel, "保存成功! ");
         });
 
+
+        //获取代理浏览器对象单位网络状态
+        lanZouYPanel.getDemoJButton().addActionListener(e -> {
+            BrowserMobProxy browserMobProxy = getDataParent().getBrowserMobProxy();
+            if (browserMobProxy == null) {
+                return;
+            }
+            EdgeDriver edgeDriver = super.getDataParent().getEdgeDriver();
+            //获取监听网络请求的结果
+            //获取返回请求的内容
+            List<HarEntry> entries = browserMobProxy.getHar().getLog().getEntries();
+            for (HarEntry harEntry : entries) {
+                String url = harEntry.getRequest().getUrl();
+                if (!(url.contains("https://www.lanzoui.com/fn?"))) {
+                    continue;
+                }
+                System.out.println(url);
+                edgeDriver.get(url);
+                break;
+            }
+        });
 
     }
 
