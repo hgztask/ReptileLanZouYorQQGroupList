@@ -3,6 +3,7 @@ package com.MultithreadCrawling.picturesAndText.business;
 import com.MultithreadCrawling.picturesAndText.data.DataLanZouY;
 import com.MultithreadCrawling.picturesAndText.data.DataParent;
 import com.MultithreadCrawling.picturesAndText.view.HomeView;
+import com.MultithreadCrawling.picturesAndText.view.QQPanel;
 import com.MultithreadCrawling.picturesAndText.view.panel.LanZouYJPanel;
 import com.MultithreadCrawling.picturesAndText.view.panel.ParentPanel;
 
@@ -83,16 +84,18 @@ public class HomeEss {
 
         //蓝奏云面板
         LanZouYJPanel lanZouYPanel = new LanZouYJPanel();
-
-        //父级属性
-        DataParent dataParent = new DataParent();
+        //qq面板
+        QQPanel qqPanel = new QQPanel();
 
         //添加蓝奏云面板
-        DataLanZouY dataLanZouY = new DataLanZouY();
-        LanZouYJPanelEss lanZouYJPanelEss = new LanZouYJPanelEss(dataParent, lanZouYPanel, dataLanZouY);
+        LanZouYJPanelEss lanZouYJPanelEss = new LanZouYJPanelEss(lanZouYPanel, new DataParent(), lanZouYPanel, new DataLanZouY());
+        //添加QQ面板
+        QQPanelEss qqPanelEss = new QQPanelEss(qqPanel, new DataParent(), qqPanel);
         lanZouYJPanelEss.initialization();
+        qqPanelEss.initialization();
 
-        jTabbedPane.add("蓝奏云", lanZouYPanel.getModelJPanel());
+        jTabbedPane.add("蓝奏云面板", lanZouYPanel.getModelJPanel());
+        jTabbedPane.add("QQ面板", qqPanel.getModelJPanel());
 
         //jTabbedPane.add("蓝奏云面板", LanZhouYunJPanel.getLanZhouYunPanel().getModelJPanel());
         //添加QQ面板

@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Objects;
+
 /**
  * qq群成员信息
  */
@@ -45,6 +47,29 @@ public class QqInformation {
         this.finalStatement = finalStatement;
     }
 
+
+    /**
+     * 判断qq号是否是相同的,作为是否是相同的对象
+     *
+     * @param o 对象
+     * @return 布尔值
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        QqInformation that = (QqInformation) o;
+        return Objects.equals(qqIndex, that.qqIndex);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(qqIndex);
+    }
 
     @Override
     public String toString() {

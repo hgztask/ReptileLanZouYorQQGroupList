@@ -14,6 +14,7 @@ import com.MultithreadCrawling.picturesAndText.impi.CrawlingRuleFace;
 import com.MultithreadCrawling.picturesAndText.impi.InitializationFace;
 import com.MultithreadCrawling.picturesAndText.view.JFileChooserDialog;
 import com.MultithreadCrawling.picturesAndText.view.panel.LanZouYJPanel;
+import com.MultithreadCrawling.picturesAndText.view.panel.ParentPanel;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.Setter;
@@ -71,17 +72,26 @@ public class LanZouYJPanelEss  extends ParentPanelEss implements CrawlingRuleFac
     }
 
 
-
-
-
-
+    /**
+     * 构造器
+     *
+     * @param parentPanel  父级面板或者是其继承的子类
+     * @param dataParent   面板父级的属性成员
+     * @param lanZouYPanel 蓝奏云面板 核心是输入蓝奏云特需要的组件控件
+     * @param dataLanZouY  蓝奏云属性层
+     */
+    public LanZouYJPanelEss(ParentPanel parentPanel, DataParent dataParent, LanZouYJPanel lanZouYPanel, DataLanZouY dataLanZouY) {
+        super(parentPanel, dataParent);
+        this.lanZouYPanel = lanZouYPanel;
+        this.dataLanZouY = dataLanZouY;
+    }
 
     @Override
-    public void initialization(){
+    public void initialization() {
         super.initialization();
         //顶部面板与底部面板
         JPanel topJPanel = lanZouYPanel.getTopJPanel();
-        topJPanel.setLayout(new GridLayout(6,1));
+        topJPanel.setLayout(new GridLayout(6, 1));
         JPanel bottJPanel = lanZouYPanel.getBottJPanel();
         bottJPanel.setLayout(new GridLayout(4, 3));
 

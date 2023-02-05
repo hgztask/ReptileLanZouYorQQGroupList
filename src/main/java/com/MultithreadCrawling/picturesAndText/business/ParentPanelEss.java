@@ -58,8 +58,6 @@ public  class ParentPanelEss implements InitializationFace {
     @Override
     public  void initialization(){
 
-        EdgeDriver edgeDriver = dataParent.getEdgeDriver();
-
         //设置打开浏览器右击菜单项目
         JPopupMenu webWindowjPopupMenu = parentPanel.getWebWindowjPopupMenu();
         JMenuItem webWindowsMax = parentPanel.getWebWindowsMax();
@@ -80,23 +78,6 @@ public  class ParentPanelEss implements InitializationFace {
         webWindowjPopupMenu.add(scrollBottomItem);
         webWindowjPopupMenu.add(continuedScrollBottomItem);
         webWindowjPopupMenu.add(webAgentItem);
-
-
-        //添加控件
-        JPanel bottJPanel = parentPanel.getBottJPanel();
-        bottJPanel.add(parentPanel.getOpenWebJbutton());
-        bottJPanel.add(parentPanel.getLoadUrlJbutton());
-        bottJPanel.add(parentPanel.getPrintWebJButton());
-        bottJPanel.add(parentPanel.getPrintListJButton());
-        bottJPanel.add(parentPanel.getWriteListJbutton());
-
-        parentPanel.getModelJPanel().add(bottJPanel);
-
-
-
-
-
-        System.out.println("已触发父类逻辑层初始化方法initialization");
 
         //打开浏览器浏览器对象
         parentPanel.getOpenWebJbutton().addActionListener(new ActionListener() {
@@ -133,6 +114,7 @@ public  class ParentPanelEss implements InitializationFace {
         //监听器
         //点击最大化web窗口
         webWindowsMax.addActionListener(e -> {
+            EdgeDriver edgeDriver = dataParent.getEdgeDriver();
             if (!isWebEdgeClose(edgeDriver)) {
                 return;
             }
@@ -142,6 +124,7 @@ public  class ParentPanelEss implements InitializationFace {
         //监听器
         //点击最小化web窗口
         webWindowsMix.addActionListener(e -> {
+            EdgeDriver edgeDriver = dataParent.getEdgeDriver();
             if (!isWebEdgeClose(edgeDriver)) {
                 return;
             }
@@ -150,6 +133,7 @@ public  class ParentPanelEss implements InitializationFace {
 
         //设置默认窗口大小
         webWindowsdef.addActionListener(e -> {
+            EdgeDriver edgeDriver = dataParent.getEdgeDriver();
             if (!isWebEdgeClose(edgeDriver)) {
                 return;
             }
@@ -159,6 +143,7 @@ public  class ParentPanelEss implements InitializationFace {
         //监听器
         //全屏web窗口
         webWindowsfullscreen.addActionListener(e -> {
+            EdgeDriver edgeDriver = dataParent.getEdgeDriver();
             if (!isWebEdgeClose(edgeDriver)) {
                 return;
             }
@@ -167,6 +152,7 @@ public  class ParentPanelEss implements InitializationFace {
 
         //获取浏览器窗口大小
         webWindowsSize.addActionListener(e -> {
+            EdgeDriver edgeDriver = dataParent.getEdgeDriver();
             if (!(isWebEdgeClose(edgeDriver))) {
                 return;
             }
@@ -177,11 +163,11 @@ public  class ParentPanelEss implements InitializationFace {
         newWebWindowsItem.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             dataParent.setBoolUrl(false);
             dataParent.setEdgeDriver(new EdgeDriver());
-            edgeDriver.manage().window().setSize(dataParent.getDimension());
+            dataParent.getEdgeDriver().manage().window().setSize(dataParent.getDimension());
         }));
 
         //滚动页面底部
-        scrollBottomItem.addActionListener(e -> edgeDriver.executeScript("window.scrollTo(0,document.body.scrollHeight)"));
+        scrollBottomItem.addActionListener(e -> dataParent.getEdgeDriver().executeScript("window.scrollTo(0,document.body.scrollHeight)"));
 
         /**
          *监听器
@@ -189,7 +175,7 @@ public  class ParentPanelEss implements InitializationFace {
          */
         continuedScrollBottomItem.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
             while (continuedScrollBottomItem.getState()) {
-                edgeDriver.executeScript("window.scrollTo(0,document.body.scrollHeight)");
+                dataParent.getEdgeDriver().executeScript("window.scrollTo(0,document.body.scrollHeight)");
             }
             System.out.println("已经结束持续滚动底部");
         }));

@@ -35,7 +35,7 @@ public abstract class ParentPanel {
     /**
      * 顶部面板
      */
-    private JPanel topJPanel = new JPanel(null);
+    private JPanel topJPanel = new JPanel();
 
     /**
      * 底部面板
