@@ -1,2 +1,2 @@
 # picturesAndText
-我是描述效果
+爬取蓝奏云列表资源

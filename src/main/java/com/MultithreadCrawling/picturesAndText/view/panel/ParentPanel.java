@@ -3,10 +3,6 @@ package com.MultithreadCrawling.picturesAndText.view.panel;
 import com.MultithreadCrawling.picturesAndText.view.TextEdtorView;
 import lombok.Getter;
 import lombok.Setter;
-import net.lightbody.bmp.BrowserMobProxy;
-import net.lightbody.bmp.BrowserMobProxyServer;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.edge.EdgeDriver;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,7 +16,8 @@ import java.awt.*;
  */
 @Getter
 @Setter
-public class ParentPanel {
+public abstract class ParentPanel {
+
 
     /**
      * 列表信息

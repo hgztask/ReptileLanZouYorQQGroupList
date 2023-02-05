@@ -81,21 +81,18 @@ public class HomeEss {
         jFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
 
+        //蓝奏云面板
+        LanZouYJPanel lanZouYPanel = new LanZouYJPanel();
 
-
-
-        //父级面板\属性\逻辑层
+        //父级属性
         DataParent dataParent = new DataParent();
-        ParentPanel parentPanel = new ParentPanel();
-        ParentPanelEss parentPanelEss = new ParentPanelEss(parentPanel, dataParent);
 
         //添加蓝奏云面板
-        LanZouYJPanel lanZouYPanel = new LanZouYJPanel();
         DataLanZouY dataLanZouY = new DataLanZouY();
-        LanZouYJPanelEss lanZouYJPanelEss = new LanZouYJPanelEss(parentPanel, dataParent, lanZouYPanel, dataLanZouY, parentPanelEss);
+        LanZouYJPanelEss lanZouYJPanelEss = new LanZouYJPanelEss(dataParent, lanZouYPanel, dataLanZouY);
         lanZouYJPanelEss.initialization();
 
-        jTabbedPane.add("蓝奏云",lanZouYPanel.getModelJPanel());
+        jTabbedPane.add("蓝奏云", lanZouYPanel.getModelJPanel());
 
         //jTabbedPane.add("蓝奏云面板", LanZhouYunJPanel.getLanZhouYunPanel().getModelJPanel());
         //添加QQ面板

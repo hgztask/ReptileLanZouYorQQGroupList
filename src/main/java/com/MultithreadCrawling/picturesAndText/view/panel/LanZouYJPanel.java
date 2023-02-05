@@ -10,6 +10,7 @@ import javax.swing.*;
  * 核心是输入蓝奏云特需要的组件控件
  */
 @Data
+@SuppressWarnings("all")
 public class LanZouYJPanel extends ParentPanel {
     /**
      * 监听网页列表变化
@@ -65,13 +66,13 @@ public class LanZouYJPanel extends ParentPanel {
      * 显示外部数据路径
      * 这个根据模块选择,不是所有模块都需要该功能
      */
-    private JLabel pathFileJLabel = new JLabel();
+    private JLabel pathFileJLabel = new JLabel("显示外部数据路径======================");
 
     /**
      * 显示url
      * 这个根据模块选择,不是所有模块都需要该功能
      */
-    private JLabel urlJLabel = new JLabel();
+    private JLabel urlJLabel = new JLabel("显示url==========================");
 
 
     /**

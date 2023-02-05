@@ -6,16 +6,17 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
-import com.MultithreadCrawling.picturesAndText.impi.InitializationFace;
-import com.MultithreadCrawling.picturesAndText.view.panel.LanZouYJPanel;
 import com.MultithreadCrawling.picturesAndText.data.DataLanZouY;
 import com.MultithreadCrawling.picturesAndText.data.DataParent;
 import com.MultithreadCrawling.picturesAndText.data.LanZouYInfo;
 import com.MultithreadCrawling.picturesAndText.data.ruleFace.LanZouYRule;
 import com.MultithreadCrawling.picturesAndText.impi.CrawlingRuleFace;
+import com.MultithreadCrawling.picturesAndText.impi.InitializationFace;
 import com.MultithreadCrawling.picturesAndText.view.JFileChooserDialog;
-import com.MultithreadCrawling.picturesAndText.view.panel.ParentPanel;
+import com.MultithreadCrawling.picturesAndText.view.panel.LanZouYJPanel;
+import lombok.Data;
 import lombok.NonNull;
+import lombok.Setter;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -43,38 +44,35 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  * @date 2023/2/4 15:46
  */
-public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace<ArrayList<LanZouYInfo>>,InitializationFace {
+public class LanZouYJPanelEss  extends ParentPanelEss implements CrawlingRuleFace<ArrayList<LanZouYInfo>>,InitializationFace {
 
     /**
      * 蓝奏云面板view
      */
+    @Setter
     private LanZouYJPanel lanZouYPanel;
     /**
      * 蓝奏云属性层
      */
+    @Setter
     private DataLanZouY dataLanZouY;
 
 
     /**
-     * 父级逻辑层
-     */
-    private ParentPanelEss parentPanelEss;
-
-    /**
      * 构造器
-     *
-     * @param parentPanel 所有面板共有的组件
-     * @param dataParent  父级面板的属性
+     * @param dataParent 面板父级的属性成员
      * @param lanZouYPanel 蓝奏云面板 核心是输入蓝奏云特需要的组件控件
      * @param dataLanZouY 蓝奏云属性层
-     * @param parentPanelEss 父级面板逻辑层 有显示需求调用父级面板功能即可
      */
-    public LanZouYJPanelEss(@NonNull ParentPanel parentPanel, DataParent dataParent, @NonNull LanZouYJPanel lanZouYPanel, DataLanZouY dataLanZouY, ParentPanelEss parentPanelEss) {
-        super(parentPanel, dataParent);
+    public LanZouYJPanelEss(DataParent dataParent, LanZouYJPanel lanZouYPanel, DataLanZouY dataLanZouY) {
+        super(lanZouYPanel, dataParent);
         this.lanZouYPanel = lanZouYPanel;
         this.dataLanZouY = dataLanZouY;
-        this.parentPanelEss = parentPanelEss;
     }
+
+
+
+
 
 
 
@@ -83,34 +81,32 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
         super.initialization();
         //顶部面板与底部面板
         JPanel topJPanel = lanZouYPanel.getTopJPanel();
+        topJPanel.setLayout(new GridLayout(6,1));
         JPanel bottJPanel = lanZouYPanel.getBottJPanel();
         bottJPanel.setLayout(new GridLayout(4, 3));
-
-        //设置要加载的网页
-        super.getDataParent().setUrl("https://t.bilibili.com/757166433425686552");
 
 
         //每一个对象一个面板
         JPanel modelJPanel = lanZouYPanel.getModelJPanel();
-        //显示url选择文本
-        JLabel urlJLabel = lanZouYPanel.getUrlJLabel();
-        //显示外部数据路径标签文本
-        JLabel pathFileJLabel = lanZouYPanel.getPathFileJLabel();
 
         JCheckBoxMenuItem whileCHicjMenuItem = lanZouYPanel.getWhileCHicjMenuItem();
 
         //设置外部数据按钮
         JButton fIleDataJButton = lanZouYPanel.getFIleDataJButton();
-        fIleDataJButton.setBounds(0, urlJLabel.getHeight(), 130, 20);
         //总个数
         JLabel countIndexJLabel = lanZouYPanel.getCountIndexJLabel();
-        countIndexJLabel.setBounds(0, fIleDataJButton.getY(), 180, 50);
+
         //外部个数
         JLabel externalCountIndexJLabel = lanZouYPanel.getExternalCountIndexJLabel();
-        externalCountIndexJLabel.setBounds(0, countIndexJLabel.getY() + 13, 180, 50);
+
+        //显示url选择文本
+        JLabel urlJLabel = lanZouYPanel.getUrlJLabel();
+
+        //显示外部数据路径标签文本
+        JLabel pathFileJLabel = lanZouYPanel.getPathFileJLabel();
         //新的个数标签文本
         JLabel newCountIndexJLabel = lanZouYPanel.getNewCountIndexJLabel();
-        newCountIndexJLabel.setBounds(externalCountIndexJLabel.getWidth(), externalCountIndexJLabel.getY(), 1000, 50);
+
 
         //模拟点击下一页
         JButton startPage = lanZouYPanel.getStartPageJButton();
@@ -121,15 +117,18 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
         topJPanel.add(newCountIndexJLabel);
 
         //添加控件
+        //添加父组件
         bottJPanel.add(lanZouYPanel.getOpenWebJbutton());
         bottJPanel.add(lanZouYPanel.getLoadUrlJbutton());
-        bottJPanel.add(lanZouYPanel.getMonitorJRadioButton());
         bottJPanel.add(lanZouYPanel.getPrintWebJButton());
         bottJPanel.add(lanZouYPanel.getPrintListJButton());
+        bottJPanel.add(lanZouYPanel.getWriteListJbutton());
+
+        //添加蓝奏云特需要的组件
+        bottJPanel.add(lanZouYPanel.getMonitorJRadioButton());
         bottJPanel.add(lanZouYPanel.getPrintNewListJButton());
         bottJPanel.add(lanZouYPanel.getAddListJButton());
         bottJPanel.add(lanZouYPanel.getStartPageJButton());
-        bottJPanel.add(lanZouYPanel.getWriteListJbutton());
         bottJPanel.add(lanZouYPanel.getPrintOldListJButton());
         bottJPanel.add(lanZouYPanel.getPrintStraightUrlJButton());
         bottJPanel.add(lanZouYPanel.getFilesInFolderJButton());
@@ -138,7 +137,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
         lanZouYPanel.getStartPagejPopupMenu().add(whileCHicjMenuItem);
 
 
-        EdgeDriver edgeDriver = super.getDataParent().getEdgeDriver();
+
 
 
         JMenuItem editUrlItem = lanZouYPanel.getEditUrlItem();
@@ -156,6 +155,9 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
         JPopupMenu monitorJRadiojPopupMenu = lanZouYPanel.getMonitorJRadiojPopupMenu();
         monitorJRadiojPopupMenu.add(lanZouYPanel.getAppendWebItem());
         monitorJRadiojPopupMenu.add(editUrlItem);
+
+
+        super.getDataParent().setUrl("https://www.lanzoui.com/b93256");
 
 
         JRadioButton monitorJRadioButton = lanZouYPanel.getMonitorJRadioButton();
@@ -190,11 +192,11 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
 
         //编辑加载的url
         editUrlItem.addActionListener(e -> {
-            if (!(isWebEdgeOpenUrl() || isWebEdgeClose(edgeDriver))) {
+            if (!(super.isWebEdgeOpenUrl() || super.isWebEdgeClose(super.getDataParent().getEdgeDriver()))) {
                 return;
             }
-
-            if (!getDataParent().isBoolUrl()) {
+            DataParent dataParent = super.getDataParent();
+            if (!dataParent.isBoolUrl()) {
                 JOptionPane.showMessageDialog(modelJPanel, "请先加载url！");
                 return;
             }
@@ -206,24 +208,27 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
                 JOptionPane.showMessageDialog(modelJPanel, "格式不正确!");
                 return;
             }
-            super.getDataParent().setUrl(editContentUrl);
+            dataParent.setUrl(editContentUrl);
             urlJLabel.setText(editContentUrl);
         });
 
         //打印文件直链
         lanZouYPanel.getPrintStraightUrlJButton().addActionListener(e -> {
-            if (!(isWebEdgeOpenUrl() || isWebEdgeClose(edgeDriver))) {
+            EdgeDriver edgeDriver = super.getDataParent().getEdgeDriver();
+            if (!(super.isWebEdgeOpenUrl() || super.isWebEdgeClose(edgeDriver))) {
                 return;
             }
-            Document parse = Jsoup.parse(edgeDriver.getPageSource());
-            Element n_downlink = parse.getElementsByClass("n_downlink").get(0);
-            System.out.println(n_downlink);
+            System.out.println("该功能暂时未完成!");
+//            Document parse = Jsoup.parse(edgeDriver.getPageSource());
+//            Element n_downlink = parse.getElementsByClass("n_downlink").get(0);
+//            System.out.println(n_downlink);
         });
 
 
         //获取文件夹内文件
         lanZouYPanel.getFilesInFolderJButton().addActionListener(e -> {
-            if (!(isWebEdgeOpenUrl() || isWebEdgeClose(edgeDriver))) {
+            EdgeDriver edgeDriver = super.getDataParent().getEdgeDriver();
+            if (!(super.isWebEdgeOpenUrl() || super.isWebEdgeClose(edgeDriver))) {
                 return;
             }
             Document parse = Jsoup.parse(edgeDriver.getPageSource());
@@ -266,7 +271,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
          * 模拟点击一次网页位置
          */
         startPage.addActionListener(e -> {
-            if (!(isWebEdgeOpenUrl() || isWebEdgeClose(edgeDriver))) {
+            if (!(super.isWebEdgeOpenUrl() || super.isWebEdgeClose(super.getDataParent().getEdgeDriver()))) {
                 return;
             }
             analogClick();
@@ -294,7 +299,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
          * 触发循环点击模拟下一页和秩序滚动底部
          */
         whileCHicjMenuItem.addActionListener(e -> {
-            if (!(super.isWebEdgeOpenUrl() || super.isWebEdgeClose(edgeDriver))) {
+            if (!(super.isWebEdgeOpenUrl() || super.isWebEdgeClose(super.getDataParent().getEdgeDriver()))) {
                 whileCHicjMenuItem.setState(false);
                 return;
             }
@@ -317,7 +322,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             //单独执行持续滚动底部
             threadPool.execute(() -> {
                 while (whileCHicjMenuItem.getState()) {
-                    edgeDriver.executeScript("window.scrollTo(0,document.body.scrollHeight)");
+                    super.getDataParent().getEdgeDriver().executeScript("window.scrollTo(0,document.body.scrollHeight)");
                 }
                 JOptionPane.showMessageDialog(whileCHicjMenuItem, "已经结束持续滚动底部");
             });
@@ -374,7 +379,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
                         //subtract([1,2,3,4],[2,3,4,5]) -》 [1]
                         ArrayList<LanZouYInfo> newList;
                         newList = new ArrayList<>(CollUtil.subtract(detectUpdateWeb, dataList));
-                        getDataParent().setBoolPrintList(true);
+                        super.getDataParent().setBoolPrintList(true);
                         super.printList("新数据列表", newList);
                         System.out.printf("长度=%s,更新时间=%s%n", newList.size(), DateUtil.now());
                         //如果勾选了追加进列表则执行追加列表
@@ -385,7 +390,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
 
                     }
                     //刷新网页
-                    edgeDriver.navigate().refresh();
+                    super.getDataParent().getEdgeDriver().navigate().refresh();
                     try {
                         TimeUnit.MINUTES.sleep(1);
                     } catch (InterruptedException ex) {
@@ -398,7 +403,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
 
         //打印网页中所有列表信息
         lanZouYPanel.getPrintListJButton().addActionListener(e -> {
-            if (!(isPrintBool())) {
+            if (!(super.isPrintBool())) {
                 return;
             }
             if (super.getDataParent().isBoolPrintList()) {
@@ -408,12 +413,12 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             ExecutorService threadPool = Executors.newCachedThreadPool();
             threadPool.execute(() -> {
                 //读取网页中的列表元素
-                ArrayList<LanZouYInfo> webList = crawlingRule(edgeDriver.getPageSource());
+                ArrayList<LanZouYInfo> webList = crawlingRule(super.getDataParent().getEdgeDriver().getPageSource());
                 if (webList.isEmpty()) {
                     JOptionPane.showMessageDialog(bottJPanel, "网页并未有指定列表元素信息！");
                     return;
                 }
-                printList("网页中所有的列表信息", webList);
+                super.printList("网页中所有的列表信息", webList);
             });
         });
 
@@ -422,7 +427,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
          * 打印网页中新的列表信息
          */
         lanZouYPanel.getPrintNewListJButton().addActionListener(e -> {
-            if (!(isPrintBool())) {
+            if (!(super.isPrintBool())) {
                 return;
             }
             LinkedHashSet<LanZouYInfo> dataList = dataLanZouY.getDataList();
@@ -449,14 +454,14 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
                 ArrayList<LanZouYInfo> newList = new ArrayList<>(CollUtil.subtract(detectUpdateWeb, dataLanZouY.getDataList()));
                 dataLanZouY.setNewList(newList);
                 super.getDataParent().setBoolPrintList(true);
-                printList("新数据列表", newList);
+                super.printList("新数据列表", newList);
             });
         });
 
 
         //追加新列表信息
         lanZouYPanel.getAddListJButton().addActionListener(e -> {
-            if (!(isPrintBool())) {
+            if (!(super.isPrintBool())) {
                 return;
             }
             LinkedHashSet<LanZouYInfo> dataList = dataLanZouY.getDataList();

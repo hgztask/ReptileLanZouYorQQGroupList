@@ -38,6 +38,7 @@ public  class ParentPanelEss implements InitializationFace {
     /**
      * 父级面板组件
      */
+    @Getter
     private final ParentPanel parentPanel;
 
     /**
@@ -79,8 +80,23 @@ public  class ParentPanelEss implements InitializationFace {
         webWindowjPopupMenu.add(scrollBottomItem);
         webWindowjPopupMenu.add(continuedScrollBottomItem);
         webWindowjPopupMenu.add(webAgentItem);
-        System.out.println("父类逻辑层被触发了");
 
+
+        //添加控件
+        JPanel bottJPanel = parentPanel.getBottJPanel();
+        bottJPanel.add(parentPanel.getOpenWebJbutton());
+        bottJPanel.add(parentPanel.getLoadUrlJbutton());
+        bottJPanel.add(parentPanel.getPrintWebJButton());
+        bottJPanel.add(parentPanel.getPrintListJButton());
+        bottJPanel.add(parentPanel.getWriteListJbutton());
+
+        parentPanel.getModelJPanel().add(bottJPanel);
+
+
+
+
+
+        System.out.println("已触发父类逻辑层初始化方法initialization");
 
         //打开浏览器浏览器对象
         parentPanel.getOpenWebJbutton().addActionListener(new ActionListener() {
