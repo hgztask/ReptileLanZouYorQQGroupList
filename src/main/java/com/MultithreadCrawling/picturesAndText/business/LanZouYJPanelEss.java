@@ -238,7 +238,13 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
                 return;
             }
             Document parse = Jsoup.parse(edgeDriver.getPageSource());
-            String attr = parse.getElementById("tourl").getElementsByTag("a").get(0).attr("href");
+            String attr;
+            try {
+                attr = parse.getElementById("tourl").getElementsByTag("a").get(0).attr("href");
+            } catch (Exception ex) {
+                System.out.println("获取文件直链失败!" + ex.getMessage());
+                return;
+            }
             System.out.println(attr);
         });
 
@@ -536,6 +542,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             //获取监听网络请求的结果
             //获取返回请求的内容
             List<HarEntry> entries = browserMobProxy.getHar().getLog().getEntries();
+            super.printList("浏览器代理对象", entries);
             for (HarEntry harEntry : entries) {
                 String url = harEntry.getRequest().getUrl();
                 if (!(url.contains("https://www.lanzoui.com/fn?"))) {
