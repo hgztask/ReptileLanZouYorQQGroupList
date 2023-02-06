@@ -13,6 +13,7 @@ import com.MultithreadCrawling.picturesAndText.data.ruleFace.LanZouYRule;
 import com.MultithreadCrawling.picturesAndText.impi.CrawlingRuleFace;
 import com.MultithreadCrawling.picturesAndText.impi.InitializationFace;
 import com.MultithreadCrawling.picturesAndText.view.JFileChooserDialog;
+import com.MultithreadCrawling.picturesAndText.view.TextEdtorView;
 import com.MultithreadCrawling.picturesAndText.view.panel.LanZouYJPanel;
 import com.MultithreadCrawling.picturesAndText.view.panel.ParentPanel;
 import io.netty.handler.codec.http.HttpRequest;
@@ -538,20 +539,22 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             if (browserMobProxy == null) {
                 return;
             }
-            EdgeDriver edgeDriver = super.getDataParent().getEdgeDriver();
             //获取监听网络请求的结果
             //获取返回请求的内容
             List<HarEntry> entries = browserMobProxy.getHar().getLog().getEntries();
             super.printList("浏览器代理对象", entries);
+            LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
             for (HarEntry harEntry : entries) {
                 String url = harEntry.getRequest().getUrl();
                 if (!(url.contains("https://www.lanzoui.com/fn?"))) {
                     continue;
                 }
-                System.out.println(url);
-                edgeDriver.get(url);
-                break;
+                linkedHashSet.add(url);
             }
+            if (linkedHashSet.isEmpty()) {
+                return;
+            }
+            super.newPrintList(new TextEdtorView(), "蓝奏云相关直链网页信息", linkedHashSet);
         });
 
     }

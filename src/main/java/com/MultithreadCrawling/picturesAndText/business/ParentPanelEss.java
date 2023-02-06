@@ -13,6 +13,7 @@ import net.lightbody.bmp.BrowserMobProxyServer;
 import net.lightbody.bmp.client.ClientUtil;
 import net.lightbody.bmp.core.har.HarEntry;
 import net.lightbody.bmp.proxy.CaptureType;
+import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.Proxy;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
@@ -300,6 +301,19 @@ public  class ParentPanelEss implements InitializationFace {
 
 
     /**
+     * 创建一个新的窗体显示对应信息
+     *
+     * @param textEdtorView textEdtorView对象
+     * @param title         标题
+     * @param obj           数组类的对象
+     */
+    public void newPrintList(TextEdtorView textEdtorView, String title, Object obj) {
+        JSONArray jsonArray = JSONUtil.parseArray(obj);
+        printList(title, jsonArray.size(), jsonArray.toStringPretty());
+        printList(textEdtorView, title, String.format("长度=%s \n\n%s", jsonArray.size(), jsonArray.toStringPretty()));
+    }
+
+    /**
      * 执行打印流程
      *
      * @param obj 对象
@@ -318,24 +332,28 @@ public  class ParentPanelEss implements InitializationFace {
      * @param content 内容
      */
     public void printList(String title, int size, String content) {
-        printList(title, String.format("长度：%s\n\n%s", size, content));
+        printList(parentPanel.getTextEdtorView(), title, String.format("长度：%s\n\n%s", size, content));
     }
 
     /**
      * 打印信息
      *
-     * @param title   窗口标题
-     * @param content 规则+结果
+     * @param textEdtorView 窗体对象
+     * @param title         窗口标题
+     * @param content       规则+结果
      */
-    public void printList(String title, String content) {
+    public void printList(@NotNull TextEdtorView textEdtorView, String title, String content) {
         dataParent.setBoolUrl(true);
         dataParent.setBoolPrintList(true);
-        TextEdtorView textEdtorView = parentPanel.getTextEdtorView();
         textEdtorView.setWindowTitle(title);
         textEdtorView.setText(content);
         textEdtorView.show();
         dataParent.setBoolPrintList(false);
     }
+
+
+
+
 
     /**
      * 数据校验证
