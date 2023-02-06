@@ -24,11 +24,7 @@ public class TextEdtorView {
      */
     private TextArea textArea = new TextArea();
 
-    /**
-     * 单例对象
-     */
-    @Getter
-    private static final TextEdtorView TEXT_EDTOR_VIEW = new TextEdtorView();
+
 
 
     {
@@ -47,7 +43,7 @@ public class TextEdtorView {
     }
 
 
-    private TextEdtorView() {
+    public TextEdtorView() {
     }
 
     /**
