@@ -237,10 +237,9 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             if (!(super.isWebEdgeOpenUrl() || super.isWebEdgeClose(edgeDriver))) {
                 return;
             }
-            System.out.println("该功能暂时未完成!");
-//            Document parse = Jsoup.parse(edgeDriver.getPageSource());
-//            Element n_downlink = parse.getElementsByClass("n_downlink").get(0);
-//            System.out.println(n_downlink);
+            Document parse = Jsoup.parse(edgeDriver.getPageSource());
+            String attr = parse.getElementById("tourl").getElementsByTag("a").get(0).attr("href");
+            System.out.println(attr);
         });
 
 

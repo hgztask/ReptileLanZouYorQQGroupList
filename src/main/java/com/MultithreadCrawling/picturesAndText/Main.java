@@ -1,6 +1,12 @@
 package com.MultithreadCrawling.picturesAndText;
 
 import com.MultithreadCrawling.picturesAndText.business.HomeEss;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * @author byhgz
@@ -10,5 +16,7 @@ import com.MultithreadCrawling.picturesAndText.business.HomeEss;
 public class Main {
     public static void main(String[] args) {
         HomeEss.getInstance().show();
+
+
     }
 }

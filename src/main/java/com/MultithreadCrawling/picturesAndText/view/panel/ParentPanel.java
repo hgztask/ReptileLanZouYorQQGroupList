@@ -16,7 +16,7 @@ import java.awt.*;
  */
 @Getter
 @Setter
-public abstract class ParentPanel {
+public class ParentPanel {
 
 
     /**
@@ -125,4 +125,9 @@ public abstract class ParentPanel {
      * 开启浏览器代理
      */
     private final JCheckBoxMenuItem webAgentItem = new JCheckBoxMenuItem("开启浏览器代理");
+
+    /**
+     * 关闭浏览器
+     */
+    private JMenuItem closeJItem = new JMenuItem("关闭浏览器");
 }

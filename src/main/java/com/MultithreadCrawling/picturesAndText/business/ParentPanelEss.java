@@ -69,6 +69,7 @@ public  class ParentPanelEss implements InitializationFace {
         JMenuItem scrollBottomItem = parentPanel.getScrollBottomItem();
         JCheckBoxMenuItem continuedScrollBottomItem = parentPanel.getContinuedScrollBottomItem();
         JCheckBoxMenuItem webAgentItem = parentPanel.getWebAgentItem();
+        JMenuItem closeJItem = parentPanel.getCloseJItem();
         webWindowjPopupMenu.add(webWindowsMax);
         webWindowjPopupMenu.add(webWindowsMix);
         webWindowjPopupMenu.add(webWindowsfullscreen);
@@ -78,6 +79,7 @@ public  class ParentPanelEss implements InitializationFace {
         webWindowjPopupMenu.add(scrollBottomItem);
         webWindowjPopupMenu.add(continuedScrollBottomItem);
         webWindowjPopupMenu.add(webAgentItem);
+        webWindowjPopupMenu.add(closeJItem);
 
         //打开浏览器浏览器对象
         parentPanel.getOpenWebJbutton().addActionListener(new ActionListener() {
@@ -191,6 +193,16 @@ public  class ParentPanelEss implements InitializationFace {
                 System.out.println("关闭浏览器代理");
                 JOptionPane.showMessageDialog(parentPanel.getModelJPanel(), "请先加载url！");
             }
+        });
+
+        //关闭浏览器对象
+        closeJItem.addActionListener(e -> {
+            EdgeDriver edgeDriver = dataParent.getEdgeDriver();
+            if (!(isWebEdgeClose(edgeDriver))) {
+                return;
+            }
+            //退出驱动并关闭所有关联的窗口。
+            edgeDriver.quit();
         });
 
         //加载网页按钮监听
