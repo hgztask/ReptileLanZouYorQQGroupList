@@ -4,7 +4,9 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.MultithreadCrawling.picturesAndText.data.DataLanZouY;
 import com.MultithreadCrawling.picturesAndText.data.DataParent;
@@ -16,20 +18,16 @@ import com.MultithreadCrawling.picturesAndText.view.JFileChooserDialog;
 import com.MultithreadCrawling.picturesAndText.view.TextEdtorView;
 import com.MultithreadCrawling.picturesAndText.view.panel.LanZouYJPanel;
 import com.MultithreadCrawling.picturesAndText.view.panel.ParentPanel;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponse;
-import lombok.Data;
 import lombok.NonNull;
 import lombok.Setter;
 import net.lightbody.bmp.BrowserMobProxy;
 import net.lightbody.bmp.core.har.HarEntry;
-import net.lightbody.bmp.filters.RequestFilter;
-import net.lightbody.bmp.util.HttpMessageContents;
-import net.lightbody.bmp.util.HttpMessageInfo;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.edge.EdgeDriver;
@@ -41,10 +39,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -113,6 +113,13 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
 
         JCheckBoxMenuItem whileCHicjMenuItem = lanZouYPanel.getWhileCHicjMenuItem();
 
+        //右击打印网页中的列表直链信息
+        JPopupMenu printUrlListjPopupMenu = lanZouYPanel.getPrintUrlListjPopupMenu();
+        JMenuItem apiUrlListjMenuItem = lanZouYPanel.getApiUrlListjMenuItem();
+        printUrlListjPopupMenu.add(apiUrlListjMenuItem);
+        JMenuItem proxyUrlListjMenuItem = lanZouYPanel.getProxyUrlListjMenuItem();
+        printUrlListjPopupMenu.add(proxyUrlListjMenuItem);
+
         //设置外部数据按钮
         JButton fIleDataJButton = lanZouYPanel.getFIleDataJButton();
         //总个数
@@ -143,7 +150,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
         bottJPanel.add(lanZouYPanel.getOpenWebJbutton());
         bottJPanel.add(lanZouYPanel.getLoadUrlJbutton());
         bottJPanel.add(lanZouYPanel.getPrintWebJButton());
-        bottJPanel.add(lanZouYPanel.getDemoJButton());
+        bottJPanel.add(lanZouYPanel.getNetworkJButton());
         bottJPanel.add(lanZouYPanel.getPrintListJButton());
         bottJPanel.add(lanZouYPanel.getWriteListJbutton());
 
@@ -153,7 +160,8 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
         bottJPanel.add(lanZouYPanel.getAddListJButton());
         bottJPanel.add(lanZouYPanel.getStartPageJButton());
         bottJPanel.add(lanZouYPanel.getPrintOldListJButton());
-        bottJPanel.add(lanZouYPanel.getPrintStraightUrlJButton());
+        bottJPanel.add(lanZouYPanel.getPrintUrlListJButton());
+        bottJPanel.add(lanZouYPanel.getPrintFileUrlJButton());
         bottJPanel.add(lanZouYPanel.getFilesInFolderJButton());
 
         //添加进右击菜单
@@ -233,20 +241,17 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
         });
 
         //打印文件直链
-        lanZouYPanel.getPrintStraightUrlJButton().addActionListener(e -> {
+        lanZouYPanel.getPrintFileUrlJButton().addActionListener(e -> {
             EdgeDriver edgeDriver = super.getDataParent().getEdgeDriver();
             if (!(super.isWebEdgeOpenUrl() || super.isWebEdgeClose(edgeDriver))) {
                 return;
             }
-            Document parse = Jsoup.parse(edgeDriver.getPageSource());
-            String attr;
-            try {
-                attr = parse.getElementById("tourl").getElementsByTag("a").get(0).attr("href");
-            } catch (Exception ex) {
-                System.out.println("获取文件直链失败!" + ex.getMessage());
+            String downloadLink = getDownloadLink(edgeDriver.getPageSource());
+            if (downloadLink == null) {
+                JOptionPane.showMessageDialog(modelJPanel, "获取不到直链");
                 return;
             }
-            System.out.println(attr);
+            super.printList(new TextEdtorView(), "直链", downloadLink);
         });
 
 
@@ -279,10 +284,10 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
                 } catch (InterruptedException ex) {
                     throw new RuntimeException(ex);
                 }
-                ArrayList<LanZouYInfo> lanZouYInfoArrayList = detectUpdateWeb();
-                if (appendList(lanZouYInfoArrayList)) {
+                ArrayList<LanZouYInfo> zouYInfoArrayList = detectUpdateWeb();
+                if (appendList(zouYInfoArrayList)) {
                     System.out.println(filename + "文件夹内资源 追加完成");
-                    System.out.println(lanZouYInfoArrayList);
+                    System.out.println(zouYInfoArrayList);
                 } else {
                     System.out.println(filename + "文件夹内资源 添加失败,可能是数据源已经存储过该数据!!!!");
                 }
@@ -290,11 +295,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             JOptionPane.showMessageDialog(bottJPanel, "获取文件夹下的文件执行完成!！");
         });
 
-
-        /**
-         * 按钮监听器
-         * 模拟点击一次网页位置
-         */
+        //按钮监听器 模拟点击一次网页位置
         startPage.addActionListener(e -> {
             if (!(super.isWebEdgeOpenUrl() || super.isWebEdgeClose(super.getDataParent().getEdgeDriver()))) {
                 return;
@@ -302,18 +303,12 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             analogClick();
         });
 
-        /**
-         * 鼠标监听器
-         * 功能:右键弹出菜单
-         */
+        //鼠标监听器 功能:右键弹出菜单
         startPage.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON3) {  //监听鼠标右键
                     lanZouYPanel.getStartPagejPopupMenu().show(startPage, e.getX(), e.getY());   //要展示弹出菜单，我们只需要调用show方法即可
-                    //注意，第一个参数必须是弹出菜单所加入的窗口或是窗口中的任意一个组件
-                    //后面的坐标就是相对于这个窗口或是组件的原点（左上角）这个位置进行弹出
-                    //我们这里写的就是相对于当前窗口的左上角，鼠标点击位置的x、y位置弹出窗口
                 }
             }
         });
@@ -367,7 +362,7 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             }
             //设置file对象
             dataLanZouY.setOldFile(file);
-            ;
+
             lanZouYPanel.getPathFileJLabel().setText("外部路径:" + file);
             //将外部数据设置为程序对应面板所需的json对象
             dataLanZouY.setDataList(new LinkedHashSet<>(getFIlePathList()));
@@ -377,54 +372,52 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
 
 
         //监听网页列表变化
-        monitorJRadioButton.addActionListener(e -> {
-            Executors.newSingleThreadExecutor().execute(() -> {
-                if (!(super.isPrintBool())) {
+        monitorJRadioButton.addActionListener(e -> Executors.newSingleThreadExecutor().execute(() -> {
+            if (!(super.isPrintBool())) {
+                monitorJRadioButton.setSelected(false);
+                return;
+            }
+
+            LinkedHashSet<LanZouYInfo> dataList = dataLanZouY.getDataList();
+            if (dataList == null) {
+                int value = JOptionPane.showConfirmDialog(modelJPanel, "你并未设置外部数据,是否建立一个空的数据？");
+                //取消是2 否是1 确定0 返回值就是用户的选择结果，也是预置好的
+                if (value == JOptionPane.OK_OPTION) {
+                    dataList = new LinkedHashSet<>();
+                } else {
                     monitorJRadioButton.setSelected(false);
                     return;
                 }
-
-                LinkedHashSet<LanZouYInfo> dataList = dataLanZouY.getDataList();
-                if (dataList == null) {
-                    int value = JOptionPane.showConfirmDialog(modelJPanel, "你并未设置外部数据,是否建立一个空的数据？");
-                    //取消是2 否是1 确定0 返回值就是用户的选择结果，也是预置好的
-                    if (value == JOptionPane.OK_OPTION) {
-                        dataList = new LinkedHashSet<>();
-                    } else {
-                        monitorJRadioButton.setSelected(false);
-                        return;
+            }
+            while (monitorJRadioButton.isSelected()) {
+                System.out.println("开启功能!" + DateUtil.now());
+                ArrayList<LanZouYInfo> detectUpdateWeb = detectUpdateWeb();
+                if (!(detectUpdateWeb.isEmpty())) {
+                    //计算集合的单差集，即只返回【集合1】中有，但是【集合2】中没有的元素
+                    //例如：
+                    //subtract([1,2,3,4],[2,3,4,5]) -》 [1]
+                    ArrayList<LanZouYInfo> newList;
+                    newList = new ArrayList<>(CollUtil.subtract(detectUpdateWeb, dataList));
+                    super.getDataParent().setBoolPrintList(true);
+                    super.printList("新数据列表", newList);
+                    System.out.printf("长度=%s,更新时间=%s%n", newList.size(), DateUtil.now());
+                    //如果勾选了追加进列表则执行追加列表
+                    if (lanZouYPanel.getAppendWebItem().getState()) {
+                        appendList(newList);
                     }
+
+
                 }
-                while (monitorJRadioButton.isSelected()) {
-                    System.out.println("开启功能!" + DateUtil.now());
-                    ArrayList<LanZouYInfo> detectUpdateWeb = detectUpdateWeb();
-                    if (!(detectUpdateWeb.isEmpty())) {
-                        //计算集合的单差集，即只返回【集合1】中有，但是【集合2】中没有的元素
-                        //例如：
-                        //subtract([1,2,3,4],[2,3,4,5]) -》 [1]
-                        ArrayList<LanZouYInfo> newList;
-                        newList = new ArrayList<>(CollUtil.subtract(detectUpdateWeb, dataList));
-                        super.getDataParent().setBoolPrintList(true);
-                        super.printList("新数据列表", newList);
-                        System.out.printf("长度=%s,更新时间=%s%n", newList.size(), DateUtil.now());
-                        //如果勾选了追加进列表则执行追加列表
-                        if (lanZouYPanel.getAppendWebItem().getState()) {
-                            appendList(newList);
-                        }
-
-
-                    }
-                    //刷新网页
-                    super.getDataParent().getEdgeDriver().navigate().refresh();
-                    try {
-                        TimeUnit.MINUTES.sleep(1);
-                    } catch (InterruptedException ex) {
-                        throw new RuntimeException(ex);
-                    }
+                //刷新网页
+                super.getDataParent().getEdgeDriver().navigate().refresh();
+                try {
+                    TimeUnit.MINUTES.sleep(1);
+                } catch (InterruptedException ex) {
+                    throw new RuntimeException(ex);
                 }
-                System.out.println("结束功能!" + DateUtil.now());
-            });
-        });
+            }
+            System.out.println("结束功能!" + DateUtil.now());
+        }));
 
         //打印网页中所有列表信息
         lanZouYPanel.getPrintListJButton().addActionListener(e -> {
@@ -446,7 +439,6 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
                 super.printList("网页中所有的列表信息", webList);
             });
         });
-
 
         /***
          * 打印网页中新的列表信息
@@ -509,7 +501,6 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             });
         });
 
-
         //监听器-打印外部数据
         lanZouYPanel.getPrintOldListJButton().addActionListener(e -> {
             LinkedHashSet<LanZouYInfo> dataList = dataLanZouY.getDataList();
@@ -519,7 +510,6 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             }
             super.printList("外部数据列表", dataList);
         });
-
 
         //保存集合对象到本地文件
         lanZouYPanel.getWriteListJbutton().addActionListener(e -> {
@@ -532,9 +522,8 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             JOptionPane.showMessageDialog(bottJPanel, "保存成功! ");
         });
 
-
         //获取代理浏览器对象单位网络状态
-        lanZouYPanel.getDemoJButton().addActionListener(e -> {
+        lanZouYPanel.getNetworkJButton().addActionListener(e -> {
             BrowserMobProxy browserMobProxy = getDataParent().getBrowserMobProxy();
             if (browserMobProxy == null) {
                 return;
@@ -543,20 +532,131 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             //获取返回请求的内容
             List<HarEntry> entries = browserMobProxy.getHar().getLog().getEntries();
             super.printList("浏览器代理对象", entries);
-            LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
-            for (HarEntry harEntry : entries) {
-                String url = harEntry.getRequest().getUrl();
-                if (!(url.contains("https://www.lanzoui.com/fn?"))) {
-                    continue;
-                }
-                linkedHashSet.add(url);
-            }
+            LinkedHashSet<String> linkedHashSet = getDownAddress(entries);
             if (linkedHashSet.isEmpty()) {
                 return;
             }
             super.newPrintList(new TextEdtorView(), "蓝奏云相关直链网页信息", linkedHashSet);
         });
 
+
+        //右击打印网页中的列表直链
+        lanZouYPanel.getPrintUrlListJButton().addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {  //监听鼠标右键
+                    printUrlListjPopupMenu.show(lanZouYPanel.getPrintUrlListJButton(), e.getX(), e.getY());   //要展示弹出菜单，我们只需要调用show方法即可
+                }
+            }
+        });
+
+
+        //使用网络api接口获取直链
+        apiUrlListjMenuItem.addActionListener(e -> {
+            EdgeDriver edgeDriver = super.getDataParent().getEdgeDriver();
+            if (!(isWebEdgeOpenUrl() || isWebEdgeClose(edgeDriver))) {
+                return;
+            }
+            Executors.newSingleThreadExecutor().execute(() -> {
+                //读取网页中的列表元素
+                ArrayList<LanZouYInfo> webList = crawlingRule(edgeDriver.getPageSource());
+                if (webList.isEmpty()) {
+                    JOptionPane.showMessageDialog(bottJPanel, "网页并未有指定列表元素信息！");
+                    return;
+                }
+                LinkedHashSet<String> urlSet = new LinkedHashSet<>();
+                System.out.println("执行api获取");
+                for (LanZouYInfo info : webList) {
+                    String link = LanZouYRule.getAPIDownloadLink(info.getUrl());
+                    if (link == null) {
+                        continue;
+                    }
+                    System.out.println(link);
+                    urlSet.add(link);
+                }
+                super.newPrintList(new TextEdtorView(), "api请求结果的url数组", urlSet);
+            });
+        });
+
+        //打使用代理浏览器获取直链
+        proxyUrlListjMenuItem.addActionListener(e -> {
+            EdgeDriver edgeDriver = super.getDataParent().getEdgeDriver();
+            if (!(super.isWebEdgeClose(edgeDriver) || super.isWebEdgeOpenUrl())) {
+                return;
+            }
+            if (!(super.getDataParent().isProxyBool())) {
+                JOptionPane.showMessageDialog(bottJPanel, "请使用代理浏览器功能");
+                return;
+            }
+            BrowserMobProxy browserMobProxy = getDataParent().getBrowserMobProxy();
+            if (browserMobProxy == null) {
+                JOptionPane.showMessageDialog(bottJPanel, "请创建代理浏览器");
+                return;
+            }
+            //读取网页中的列表元素
+            ArrayList<LanZouYInfo> webList = crawlingRule(edgeDriver.getPageSource());
+            if (webList.isEmpty()) {
+                JOptionPane.showMessageDialog(bottJPanel, "网页并未有指定列表元素信息！");
+                return;
+            }
+            //记录url直链
+            LinkedHashSet<String> linkedHashSetDowndUrl = new LinkedHashSet<>();
+            for (LanZouYInfo info : webList) {
+                //加载网页文件地址
+                edgeDriver.get(info.getUrl());
+                //获取监听网络请求的结果 获取返回请求的内容
+                List<HarEntry> entries = browserMobProxy.getHar().getLog().getEntries();
+                //获取蓝奏云网络请求中的下载地址
+                LinkedHashSet<String> downAddresslinkedHashSet = getDownAddress(entries);
+                if (downAddresslinkedHashSet.isEmpty()) {
+                    return;
+                }
+                for (String url : downAddresslinkedHashSet) {
+                    edgeDriver.get(url);
+                    try {
+                        TimeUnit.SECONDS.sleep(1);
+                    } catch (InterruptedException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    //针对蓝奏云下载地址页面,获取对应的文件直链
+                    String downloadLink = getDownloadLink(edgeDriver.getPageSource());
+                    if (downloadLink == null) {
+                        continue;
+                    }
+                    linkedHashSetDowndUrl.add(downloadLink);
+                    break;
+                }
+            }
+            if (linkedHashSetDowndUrl.isEmpty()) {
+                System.out.println("并未获取到直链");
+                return;
+            }
+            super.printList(new TextEdtorView(), "网页列表直链列表", JSONUtil.parseArray(linkedHashSetDowndUrl).toStringPretty());
+        });
+
+
+    }
+
+
+    /**
+     * 获取蓝奏云网络请求中的下载地址
+     *
+     * @param entries 网络请求集合对象
+     * @return 数据集合对象
+     */
+    private LinkedHashSet<String> getDownAddress(@NonNull List<HarEntry> entries) {
+        LinkedHashSet<String> linkedHashSet = new LinkedHashSet<>();
+        for (HarEntry harEntry : entries) {
+            String url = harEntry.getRequest().getUrl();
+            if (!(url.contains("https://www.lanzoui.com/fn?"))) {
+                continue;
+            }
+            linkedHashSet.add(url);
+        }
+        if (linkedHashSet.isEmpty()) {
+            return DataLanZouY.getLINKED_HASH_SET_NULL();
+        }
+        return linkedHashSet;
     }
 
 
@@ -664,6 +764,26 @@ public class LanZouYJPanelEss extends ParentPanelEss implements CrawlingRuleFace
             tempList.add(BeanUtil.toBean(obj, LanZouYInfo.class));
         }
         return tempList;
+    }
+
+
+    /**
+     * 针对蓝奏云下载地址页面,获取对应的文件直链
+     * 需要配合使用代理浏览器使用,使用时需要先获取下载地址链接,再加载下载地址,
+     * 之后就是该方法得视情况,获取网页源码,进行截取操作
+     *
+     * @param html 下载地址页面的html源码
+     * @return 直链
+     */
+    private String getDownloadLink(String html) {
+        Document parse = Jsoup.parse(html);
+        String attr;
+        try {
+            attr = parse.getElementById("tourl").getElementsByTag("a").get(0).attr("href");
+        } catch (Exception ex) {
+            return null;
+        }
+        return attr;
     }
 
 

@@ -42,6 +42,11 @@ public class DataParent {
      */
     private BrowserMobProxy browserMobProxy = new BrowserMobProxyServer();
 
+    /**
+     * 当前是否打开代理浏览器
+     */
+    private boolean proxyBool;
+
 
     /**
      * 默认浏览器窗口大小配置

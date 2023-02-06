@@ -6,7 +6,7 @@ import javax.swing.*;
 
 /**
  * 蓝奏云面板
- *
+ * <p>
  * 核心是输入蓝奏云特需要的组件控件
  */
 @Data
@@ -24,18 +24,32 @@ public class LanZouYJPanel extends ParentPanel {
      */
     private JButton printNewListJButton = new JButton("打印网页中新的列表信息");
 
+
+    /**
+     * 打印网页中列表的直链
+     */
+    private JButton printUrlListJButton = new JButton("打印网页中的列表直链信息");
+
     /**
      * 打印外部列表信息
      * 这个根据模块选择,不是所有模块都需要该功能
      */
     private JButton printOldListJButton = new JButton("打印外部数据列表信息");
 
+    private JPopupMenu monitorJRadiojPopupMenu = new JPopupMenu();
 
     /**
-     * 右击监听网页变化
-     * 这个根据模块选择,不是所有模块都需要该功能
+     * 右击打印网页中的列表直链信息
      */
-    private JPopupMenu monitorJRadiojPopupMenu = new JPopupMenu();
+    private JPopupMenu printUrlListjPopupMenu = new JPopupMenu();
+
+
+    private JMenuItem apiUrlListjMenuItem = new JMenuItem("使用api获取");
+    /**
+     * 使用代理浏览器获取
+     */
+    private JMenuItem proxyUrlListjMenuItem = new JMenuItem("使用代理浏览器获取");
+
 
     /**
      * 右击url标签弹出菜单
@@ -88,7 +102,7 @@ public class LanZouYJPanel extends ParentPanel {
     /**
      * 打印文件的直链
      */
-    private final JButton printStraightUrlJButton = new JButton("打印文件的直链");
+    private final JButton printFileUrlJButton = new JButton("打印文件的直链");
     /**
      * 执行获取文件夹内的文件元素
      */

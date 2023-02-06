@@ -191,8 +191,8 @@ public  class ParentPanelEss implements InitializationFace {
                 System.out.println("开启浏览器代理");
             } else {
                 dataParent.getBrowserMobProxy().stop();
+                dataParent.setProxyBool(false);
                 System.out.println("关闭浏览器代理");
-                JOptionPane.showMessageDialog(parentPanel.getModelJPanel(), "请先加载url！");
             }
         });
 
@@ -254,7 +254,7 @@ public  class ParentPanelEss implements InitializationFace {
         dataParent.setBrowserMobProxy(new BrowserMobProxyServer());
         BrowserMobProxy browserMobProxy = dataParent.getBrowserMobProxy();
         browserMobProxy.start();
-        Proxy seleniumProxy = ClientUtil.createSeleniumProxy(dataParent.getBrowserMobProxy());
+        Proxy seleniumProxy = ClientUtil.createSeleniumProxy(browserMobProxy);
         //浏览器参数
         EdgeOptions options = new EdgeOptions();
         browserMobProxy.enableHarCaptureTypes(CaptureType.REQUEST_CONTENT, CaptureType.RESPONSE_CONTENT);
@@ -265,6 +265,7 @@ public  class ParentPanelEss implements InitializationFace {
         options.setExperimentalOption("useAutomationExtension", false);
         dataParent.setEdgeDriver(new EdgeDriver(options));
         dataParent.getEdgeDriver().manage().window().setSize(dataParent.getDimension());
+        dataParent.setProxyBool(true);
         return browserMobProxy;
     }
 
@@ -309,7 +310,6 @@ public  class ParentPanelEss implements InitializationFace {
      */
     public void newPrintList(TextEdtorView textEdtorView, String title, Object obj) {
         JSONArray jsonArray = JSONUtil.parseArray(obj);
-        printList(title, jsonArray.size(), jsonArray.toStringPretty());
         printList(textEdtorView, title, String.format("长度=%s \n\n%s", jsonArray.size(), jsonArray.toStringPretty()));
     }
 

@@ -60,7 +60,7 @@ public class ParentPanel {
     /**
      * 获取代理浏览器监听的网络请求信息
      */
-    private JButton demoJButton = new JButton("获取代理浏览器网络信息");
+    private JButton networkJButton = new JButton("获取代理浏览器网络信息");
 
 
     /**

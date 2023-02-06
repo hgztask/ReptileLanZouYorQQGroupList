@@ -47,6 +47,13 @@ public class DataLanZouY {
 
 
     /**
+     * 空链式set表
+     */
+    @Getter
+    private static final LinkedHashSet<String> LINKED_HASH_SET_NULL = new LinkedHashSet();
+
+
+    /**
      * 信号灯量,用于判断当前使用是那个规则实现类
      */
     private int crawlingIndex = 1;

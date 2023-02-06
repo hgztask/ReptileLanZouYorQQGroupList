@@ -1,6 +1,9 @@
 package com.MultithreadCrawling.picturesAndText.data.ruleFace;
 
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.MultithreadCrawling.picturesAndText.data.DataLanZouY;
 import com.MultithreadCrawling.picturesAndText.data.LanZouYInfo;
 import com.MultithreadCrawling.picturesAndText.impi.CrawlingRuleFace;
@@ -28,6 +31,34 @@ public class LanZouYRule {
      * 文件类型集合
      */
     private static final ArrayList<String> TYPE_LIST = ListUtil.toList("apk", "exe", "zip", "txt", "7z", "rar", "xlsx", "pdf", "docx", "doc", "xls", "dmg", "lua", "jar", "dll", "ipa", "crx", "db", "pkg", "deb", "age", "mp3", "appimage");
+
+
+    /**
+     * 使用网络api解析蓝奏云链接,并获取直链
+     *
+     * @param url 蓝奏云分享链接的地址
+     * @return 返回直链 字符串
+     */
+    public static String getAPIDownloadLink(@NonNull String url) {
+        //注意用的是自己的接口
+        String document = HttpUtil.get("https://vip.mikuchase.ltd/?url=" + url);
+        JSONObject jsonObject;
+        try {
+            jsonObject = JSONUtil.parseObj(document);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
+        Integer code = jsonObject.get("status", int.class);
+        if (code == null || code == 0) {
+            return null;
+        }
+        String downdLoadUrl = jsonObject.getByPath("info", String.class);
+        if (downdLoadUrl == null) {
+            return null;
+        }
+        return downdLoadUrl;
+    }
 
 
     /**
